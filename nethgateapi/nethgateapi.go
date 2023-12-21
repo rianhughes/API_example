@@ -17,14 +17,13 @@ func NewNethGateService(db *gorm.DB) *NethGateService {
 	return &NethGateService{db: db}
 }
 
-func (service *NethGateService) CreateUser(db *gorm.DB, newUser User) (*User, error) {
-	// Generate new UUID for the user
+func (service *NethGateService) CreateUser(newUser User) (*User, error) {
 	newUser.UserID = uuid.New()
 	newUser.CreatedDate = time.Now()
 	newUser.UpdatedDate = time.Now()
 
-	// Insert newUser into the database
-	result := db.Create(&newUser)
+	// Insert newUser into the database.
+	result := service.db.Create(&newUser)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -32,9 +31,9 @@ func (service *NethGateService) CreateUser(db *gorm.DB, newUser User) (*User, er
 }
 
 // SearchUser retrieves a user from the database by login.
-func (service *NethGateService) SearchUser(db *gorm.DB, login string) (*User, error) {
+func (service *NethGateService) SearchUser(login string) (*User, error) {
 	var user User
-	result := db.Where("login = ?", login).First(&user)
+	result := service.db.Where("login = ?", login).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -42,19 +41,19 @@ func (service *NethGateService) SearchUser(db *gorm.DB, login string) (*User, er
 }
 
 // UpdateUser updates a user's information in the database.
-func (service *NethGateService) UpdateUser(db *gorm.DB, userID uuid.UUID, updatedFields map[string]interface{}) (*User, error) {
+func (service *NethGateService) UpdateUser(userID uuid.UUID, updatedFields map[string]interface{}) (*User, error) {
 	updatedFields["UpdatedDate"] = time.Now()
-	result := db.Model(&User{}).Where("user_id = ?", userID).Updates(updatedFields)
+	result := service.db.Model(&User{}).Where("user_id = ?", userID).Updates(updatedFields)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	var user User
-	db.First(&user, userID)
+	service.db.First(&user, userID)
 	return &user, nil
 }
 
 // DeleteUser removes a user from the database.
-func (service *NethGateService) DeleteUser(db *gorm.DB, userID uuid.UUID) error {
-	result := db.Delete(&User{}, userID)
+func (service *NethGateService) DeleteUser(userID uuid.UUID) error {
+	result := service.db.Delete(&User{}, userID)
 	return result.Error
 }
