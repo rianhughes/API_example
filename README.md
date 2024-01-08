@@ -1,5 +1,3 @@
-
-
 **Responsabilities**:
 
 cmd/nethegateapi/main.go starts the application/service
@@ -14,9 +12,28 @@ internal/juno: this is just to make RPC calls to Juno
 
 internal/db: this is to store the user data in a local data base persistently
 
-
 **Structure**:
 
 internal/openAPIHandlers imports internal/nethGateAPI
 
 internal/nethGateAPI imports internal/kongAdminAPI, internal/juno, internal/db
+
+
+
+**Other notes:**
+
+Handling New Consumers:
+
+1. **Registration Through Your Handlers** : When a new user (consumer) registers via your API, your handler for user registration will process this.
+2. **API Key Generation** : As part of this registration process, your system will generate an API key for the new user.
+3. **Sync with Kong** : You then use Kong's Admin API to register this user as a consumer in Kong and associate the generated API key with them. This step is crucial for Kong to recognize and validate the API key in future requests.
+4. **Save API Key in Database** : Store the API key and any other relevant user information in your database.
+5. **Return API Key to User** : Respond to the user with their API key, which they will use for subsequent requests.
+
+Handling Requests from Existing Consumers:
+
+1. **API Requests with API Key** : Existing users send requests to your API endpoints exposed by Kong, including their API key for authentication.
+2. **Kong Gateway Filters Traffic** : Kong processes these requests first, validating the API keys and applying any other configured filters like rate limiting.
+3. **Routing to Your Application** : If the request is valid, Kong routes it to your application.
+4. **Application Processes Request** : Your application then processes the request. Since it's about interacting with a blockchain client, this step involves sending transactions to the blockchain, querying data, etc.
+5. **Responding to User** : After processing, your application sends the response back through Kong to the user.
