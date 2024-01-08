@@ -6,6 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
+////////////////////////////////
+
+//
+
+////////////////////////////////
+
 // NethGateService defines the interface for the NethGate API operations.
 type NethGateServiceInterface interface {
 	CreateUser(login string, password string) (User, error)
